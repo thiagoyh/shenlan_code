@@ -15,7 +15,9 @@
 
 //pcl::visualization::CloudViewer g_cloudViewer("cloud_viewer");
 //此处bag包的地址需要自行修改
-std::string bagfile = "/home/xcy/my_homework/HW4/shenlan/imlsMatcherProject/src/bag/imls_icp.bag";
+std::string bagfile = "/home/xcy/my_homework/HW4/imlsMatcherProject/bag/imls_icp.bag";
+
+
 
 class imlsDebug
 {
@@ -99,7 +101,7 @@ public:
         Eigen::Matrix3d rPose,rCovariance;
         if(m_imlsMatcher.Match(rPose,rCovariance))
         {
-            std::cout <<"IMLS Match Successful:"<<rPose(0,2)<<","<<rPose(1,2)<<","<<atan2(rPose(1,0),rPose(0,0))*57.295<<std::endl;
+            std::cout << "IMLS Match Successful:" << rPose(0,2)<<"," << rPose(1,2) << "," << atan2(rPose(1,0),rPose(0,0)) * 57.295 << std::endl;
             Eigen::Matrix3d lastPose;
             lastPose << cos(m_prevLaserPose(2)), -sin(m_prevLaserPose(2)), m_prevLaserPose(0),
                         sin(m_prevLaserPose(2)),  cos(m_prevLaserPose(2)), m_prevLaserPose(1),

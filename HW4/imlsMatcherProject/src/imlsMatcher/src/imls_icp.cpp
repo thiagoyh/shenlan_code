@@ -207,6 +207,17 @@ bool IMLSICPMatcher::ImplicitMLSFunction(Eigen::Vector2d x,
     //TODO
     //根据函数进行投影．计算height，即ppt中的I(x)
 
+    double I_x = 0, w = 0, w_sum = 0;
+
+    for(int i = 0; i != nearPoints.size(); ++i)
+    {
+        Eigen::Vector2d m = x - nearPoints[i];
+        w = exp(-(m(0) * m(0) + m(1) * m(1)) / (m_h * m_h));
+        w_sum += w;
+        I_x += w * m.dot(nearNormals[i]);
+    }
+
+    height = I_x / w_sum;
     //end of TODO
 
     return true;
@@ -288,6 +299,8 @@ void IMLSICPMatcher::projSourcePtToSurface(
         Eigen::Vector2d yi;
         //TODO
         //计算yi．
+
+        yi = xi - height * nearNormal;
 
         //end of TODO
         out_cloud.push_back(yi);
@@ -437,7 +450,33 @@ Eigen::Vector2d IMLSICPMatcher::ComputeNormal(std::vector<Eigen::Vector2d> &near
     Eigen::Vector2d normal;
 
     //TODO
-    //根据周围的激光点计算法向量，参考ppt中NICP计算法向量的方法
+    //if(nearPoints.size() < 4)
+    //    return normal;
+    Eigen::Vector2d center(0, 0);
+
+    for(int i = 0; i != nearPoints.size(); ++i)
+    {
+        center += nearPoints[i];
+    }
+    center /= nearPoints.size();
+
+    Eigen::Matrix2d Cov;
+    Cov << 0, 0, 0, 0;
+    //std::cerr << center << std::endl << "1" << std::endl << center.transpose() << std::endl;
+    for(int i = 0; i != nearPoints.size(); ++i)
+    {
+        Cov += (nearPoints[i] - center) * (nearPoints[i] - center).transpose();
+    }
+
+    Cov /= nearPoints.size();
+
+    Eigen::EigenSolver<Eigen::Matrix2d> es(Cov);
+    Eigen::Matrix2d D = es.pseudoEigenvalueMatrix();
+    Eigen::Matrix2d V = es.pseudoEigenvectors();
+
+    if(D(0, 0) >= D(1, 1))
+        normal = V.col(1);
+    else normal = V.col(0);
 
     //end of TODO
 
@@ -503,14 +542,14 @@ bool IMLSICPMatcher::Match(Eigen::Matrix3d& finalResult,
     result.setIdentity();
     covariance.setIdentity();
 
-    for(int i = 0; i < m_Iterations;i++)
+    for(int i = 0; i < m_Iterations; i++)
     {
         //根据当前估计的位姿对原始点云进行转换．
         std::vector<Eigen::Vector2d> in_cloud;
         for(int ix = 0; ix < m_sourcePointCloud.size();ix++)
         {
             Eigen::Vector3d origin_pt;
-            origin_pt << m_sourcePointCloud[ix],1;
+            origin_pt << m_sourcePointCloud[ix], 1;
 
             Eigen::Vector3d now_pt = result * origin_pt;
             in_cloud.push_back(Eigen::Vector2d(now_pt(0),now_pt(1)));
