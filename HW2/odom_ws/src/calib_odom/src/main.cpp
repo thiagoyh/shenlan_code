@@ -43,7 +43,6 @@ using namespace boost::asio;//定义一个命名空间，用于后面的读写�
 //用来进行里程计矫正的类
 OdomCalib Odom_calib;
 
-
 std::vector<geometry_msgs::PointStamped> mcu_path;
 
 Eigen::Vector3d  cal_delta_distence(Eigen::Vector3d odom_pose);
