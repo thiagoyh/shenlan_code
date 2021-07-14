@@ -7,7 +7,7 @@ project(Project)
 
 set(CATKIN_TOPLEVEL TRUE)
 
-# search for catkin within the workspace
+# search for catkin within the workspace 33
 set(_cmd "catkin_find_pkg" "catkin" "${CMAKE_SOURCE_DIR}")
 execute_process(COMMAND ${_cmd}
   RESULT_VARIABLE _res
