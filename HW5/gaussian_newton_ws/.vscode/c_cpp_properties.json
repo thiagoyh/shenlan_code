@@ -1,0 +1,18 @@
+{
+  "configurations": [
+    {
+      "browse": {
+        "databaseFilename": "",
+        "limitSymbolsToIncludedHeaders": true
+      },
+      "includePath": [
+        "/home/xcy/cartographer_detailed_comments_ws/install_isolated/include/**",
+        "/opt/ros/melodic/include/**",
+        "/home/xcy/my_homework/HW5/gaussian_newton_ws/src/gaussian_newton_scanmatcher/include/**",
+        "/usr/include/**"
+      ],
+      "name": "ROS"
+    }
+  ],
+  "version": 4
+}

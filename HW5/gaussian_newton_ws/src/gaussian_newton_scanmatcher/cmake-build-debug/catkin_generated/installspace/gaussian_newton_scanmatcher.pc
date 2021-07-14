@@ -1,0 +1,8 @@
+prefix=/usr/local
+
+Name: gaussian_newton_scanmatcher
+Description: Description of gaussian_newton_scanmatcher
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 

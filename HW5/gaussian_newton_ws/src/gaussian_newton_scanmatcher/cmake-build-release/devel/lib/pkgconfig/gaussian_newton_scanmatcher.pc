@@ -1,0 +1,8 @@
+prefix=/home/xcy/my_homework/HW5/gaussian_newton_ws/src/gaussian_newton_scanmatcher/cmake-build-release/devel
+
+Name: gaussian_newton_scanmatcher
+Description: Description of gaussian_newton_scanmatcher
+Version: 0.0.0
+Cflags: 
+Libs: -L${prefix}/lib 
+Requires: 
