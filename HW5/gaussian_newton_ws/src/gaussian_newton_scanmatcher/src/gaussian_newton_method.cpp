@@ -87,6 +87,25 @@ Eigen::Vector3d InterpMapValueWithDerivatives(map_t *map, Eigen::Vector2d &coord
 {
     Eigen::Vector3d ans;
     //TODO
+    ans << 0, 0, 0;
+    if (!MAP_VALID(map, coords(0), coords(1)))
+        return ans;
+
+    int cell_x, cell_y;
+    cell_x = MAP_GXWX(map, coords(0));
+    cell_y = MAP_GXWX(map, coords(1));
+
+    std::vector<double> score(4, 0);
+
+    // score[0] = map->cells[MAP_INDEX(map, cell_x, cell_y)].score;
+    // score[1] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y)].score;
+    // score[2] = map->cells[MAP_INDEX(map, cell_x, cell_y + 1)].score;
+    // score[3] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y + 1)].score;
+
+    int tmp_x[4] = {0, 1, 0, 1};
+    int tmp_y[4] = {0, 0, 1, 1};
+    for (int i = 0; i != 4; ++i)
+        score[i] = map->cells[MAP_INDEX(map, cell_x + tmp_x[i], cell_y + tmp_y[i])].score;
 
     //END OF TODO
 
