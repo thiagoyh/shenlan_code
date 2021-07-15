@@ -14,6 +14,7 @@ double GN_NormalizationAngle(double angle)
     return angle;
 }
 
+//将(x,y,\theta)转换为矩阵形式
 Eigen::Matrix3d GN_V2T(Eigen::Vector3d vec)
 {
     Eigen::Matrix3d T;

@@ -118,7 +118,7 @@ void enqueue(map_t *map, unsigned int i, unsigned int j,
 
   //这里的距离是栅格的距离
   unsigned int di = (i - src_i) > 0 ? (i - src_i) : (src_i - i);
-  unsigned int dj = (i - src_i) > 0 ? (i - src_i) : (src_i - i);
+  unsigned int dj = (j - src_j) > 0 ? (j - src_j) : (src_j - j);
   //unsigned int di = abs(i - src_i);
   //unsigned int dj = abs(j - src_j);
   double distance = cdm->distances_[di][dj];
@@ -153,6 +153,8 @@ void enqueue(map_t *map, unsigned int i, unsigned int j,
  * @param map
  * @param max_occ_dist
  */
+
+//将上一帧点云数据生成点云地图，实际上还是scan-to-scan的匹配
 void map_update_cspace(map_t *map, double max_occ_dist)
 {
   unsigned char *marked;
@@ -177,6 +179,7 @@ void map_update_cspace(map_t *map, double max_occ_dist)
   //计算出来所有的边界障碍物 只有边界障碍物才用来进行匹配 其他的障碍物都当成no-information
 
   /*所有障碍物的栅格  离障碍物的距离都标志为0  非障碍物的栅格都标记为max_occ_dist*/
+  //遍历栅格地图所有点，有激光点落入的score设置为1
   for (int i = 0; i < map->size_x; i++)
   {
     cell.src_i_ = cell.i_ = i;
@@ -195,6 +198,10 @@ void map_update_cspace(map_t *map, double max_occ_dist)
         map->cells[MAP_INDEX(map, i, j)].occ_dist = max_occ_dist;
     }
   }
+
+  //优先级队列的遍历，上下左右个扩展一个单位，其中marked控制是否访问过
+  //src_i,src_j 代表有激光击中也就是score=1的中心点。以此将一个点的
+  //影响根据高斯分布扩展到5个栅格的似然场。
 
   while (!Q.empty())
   {
