@@ -102,6 +102,7 @@ Eigen::Vector3d InterpMapValueWithDerivatives(map_t *map, Eigen::Vector2d &coord
  * @param H
  * @param b
  */
+//调用线性插值函数
 void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
                         std::vector<Eigen::Vector2d> &laser_pts,
                         Eigen::Matrix3d &H, Eigen::Vector3d &b)
@@ -110,6 +111,14 @@ void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
     b = Eigen::Vector3d::Zero();
 
     //TODO
+    //Eigen::Vector2d GN_TransPoint(Eigen::Vector2d pt, Eigen::Matrix3d T)
+
+    Eigen::Matrix3d Trans = GN_V2T(now_pose);
+    for (std::vector<Eigen::Vector2d>::size_type i = 0; i != laser_pts.size(); ++i)
+    {
+        Eigen::Vector2d laser_pts_i = GN_TransPoint(laser_pts[i], Trans);
+        Eigen::Vector3d ans = InterpMapValueWithDerivatives(map, laser_pts_i);
+    }
 
     //END OF TODO
 }
@@ -121,6 +130,7 @@ void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
  * @param init_pose
  * @param laser_pts
  */
+//调用求海塞矩阵、雅克比矩阵函数
 void GaussianNewtonOptimization(map_t *map, Eigen::Vector3d &init_pose, std::vector<Eigen::Vector2d> &laser_pts)
 {
     int maxIteration = 20;
@@ -129,6 +139,9 @@ void GaussianNewtonOptimization(map_t *map, Eigen::Vector3d &init_pose, std::vec
     for (int i = 0; i < maxIteration; i++)
     {
         //TODO
+
+        Eigen::Matrix3d H;
+        Eigen::Vector3d b;
 
         //END OF TODO
     }
