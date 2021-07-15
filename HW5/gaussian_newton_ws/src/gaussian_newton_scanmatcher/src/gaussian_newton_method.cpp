@@ -182,14 +182,23 @@ void GaussianNewtonOptimization(map_t *map, Eigen::Vector3d &init_pose, std::vec
 {
     int maxIteration = 20;
     Eigen::Vector3d now_pose = init_pose;
+    Eigen::Matrix3d H;
+    Eigen::Vector3d b;
 
     for (int i = 0; i < maxIteration; i++)
     {
         //TODO
+        ComputeHessianAndb(map, now_pose, laser_pts, H, b);
+        if (H(0, 0) && H(1, 1) && H(2, 2))
+        {
+            Eigen::Vector3d res(H.inverse() * b);
 
-        Eigen::Matrix3d H;
-        Eigen::Vector3d b;
-
+            if (res[2] > 0.25)
+                res[2] = 0.25;
+            if (res[2] < -0.25)
+                res[2] = -0.25;
+            now_pose += res;
+        }
         //END OF TODO
     }
     init_pose = now_pose;
