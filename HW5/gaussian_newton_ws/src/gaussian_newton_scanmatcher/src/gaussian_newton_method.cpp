@@ -153,7 +153,19 @@ void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
                          ans_interp(2);
 
         b[2] += rot * (1 - ans_interp(0));
+
+        H(0, 0) += ans_interp(1) * ans_interp(1);
+        H(1, 1) += ans_interp(2) * ans_interp(2);
+        H(2, 2) += rot * rot;
+
+        H(0, 1) += ans_interp(1) * ans_interp(2);
+        H(0, 2) += ans_interp(1) * rot;
+        H(1, 2) += ans_interp(2) * rot;
     }
+
+    H(1, 0) = H(0, 1);
+    H(2, 0) = H(0, 2);
+    H(2, 1) = H(1, 2);
 
     //END OF TODO
 }
