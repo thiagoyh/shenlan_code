@@ -182,6 +182,7 @@ void map_update_cspace(map_t *map, double max_occ_dist)
     cell.src_i_ = cell.i_ = i;
     for (int j = 0; j < map->size_y; j++)
     {
+      //遍历地图每一个栅格
       if (map->cells[MAP_INDEX(map, i, j)].occ_state == CELL_STATUS_OCC)
       {
         map->cells[MAP_INDEX(map, i, j)].occ_dist = 0.0;
