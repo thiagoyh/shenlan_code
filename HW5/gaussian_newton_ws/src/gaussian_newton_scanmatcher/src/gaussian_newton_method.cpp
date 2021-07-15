@@ -134,12 +134,25 @@ void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
 
     //TODO
     //Eigen::Vector2d GN_TransPoint(Eigen::Vector2d pt, Eigen::Matrix3d T)
-
+    //将now_pose转成矩阵形式
     Eigen::Matrix3d Trans = GN_V2T(now_pose);
+
     for (std::vector<Eigen::Vector2d>::size_type i = 0; i != laser_pts.size(); ++i)
     {
-        Eigen::Vector2d laser_pts_i = GN_TransPoint(laser_pts[i], Trans);
-        Eigen::Vector3d ans = InterpMapValueWithDerivatives(map, laser_pts_i);
+        Eigen::Vector2d laser_pt = laser_pts[i];
+        Eigen::Vector2d laser_pts_i = GN_TransPoint(laser_pt, Trans);
+        Eigen::Vector3d ans_interp = InterpMapValueWithDerivatives(map, laser_pts_i);
+
+        b[0] += ans_interp(1) * (1 - ans_interp(0));
+        b[1] += ans_interp(2) * (1 - ans_interp(0));
+
+        double theta = now_pose(2);
+        double rot = ((-sin(theta) * laser_pt(0) - cos(theta) * laser_pt(1))) *
+                         ans_interp(1) +
+                     (cos(theta) * laser_pt(0) - sin(theta) * laser_pt(1)) *
+                         ans_interp(2);
+
+        b[2] += rot * (1 - ans_interp(0));
     }
 
     //END OF TODO
