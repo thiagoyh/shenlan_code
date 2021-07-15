@@ -94,21 +94,24 @@ Eigen::Vector3d InterpMapValueWithDerivatives(map_t *map, Eigen::Vector2d &coord
     int cell_x, cell_y;
     cell_x = MAP_GXWX(map, coords(0));
     cell_y = MAP_GXWX(map, coords(1));
+    double delta_x = (coords(0) - map->origin_x) / map->resolution + 0.5 + map->size_x / 2 - cell_x;
+    double delta_y = (coords(1) - map->origin_y) / map->resolution + 0.5 + map->size_x / 2 - cell_y;
 
     std::vector<double> score(4, 0);
-
     // score[0] = map->cells[MAP_INDEX(map, cell_x, cell_y)].score;
     // score[1] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y)].score;
     // score[2] = map->cells[MAP_INDEX(map, cell_x, cell_y + 1)].score;
     // score[3] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y + 1)].score;
-
-    int tmp_x[4] = {0, 1, 0, 1};
+    int tmp_x[4] = {0, 1, 1, 0};
     int tmp_y[4] = {0, 0, 1, 1};
     for (int i = 0; i != 4; ++i)
         score[i] = map->cells[MAP_INDEX(map, cell_x + tmp_x[i], cell_y + tmp_y[i])].score;
 
+    ans << (1 - delta_y) * (delta_x * score[1] + (1 - delta_x) * score[0]) +
+               delta_y * (delta_x * score[2] + (1 - delta_x) * score[3]),
+        (delta_y * (score[2] - score[3]) + (1 - delta_y) * (score[1] - score[0])) / map->resolution,
+        (delta_x * (score[2] - score[1]) + (1 - delta_x) * (score[3] - score[0])) / map->resolution;
     //END OF TODO
-
     return ans;
 }
 
