@@ -1,0 +1,18 @@
+
+<launch>
+   <arg name="bag_filename" default="/home/xcy/my_homework/HW5/gaussian_newton_ws/bag/odom.bag" />
+   <param name="/use_sim_time" value="true" />
+
+   <!-- 启动节点 -->
+   <node name="gaussian_node" pkg="gaussian_newton_scanmatcher" 
+   type="gaussian_newton_node" />
+
+   <!--启动rviz-->
+   <node name="rviz" pkg="rviz" type="rviz" required="true"
+       args="-d $(find gaussian_newton_scanmatcher)/config_files/rviz.rviz" />
+
+   <!--rosbag play -->
+   <node name="playbag" pkg="rosbag" type="play" 
+       args="--clock $(arg bag_filename)" />
+
+</launch>
