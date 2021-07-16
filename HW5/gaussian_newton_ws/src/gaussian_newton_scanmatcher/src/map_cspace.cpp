@@ -117,10 +117,10 @@ void enqueue(map_t *map, unsigned int i, unsigned int j,
     return;
 
   //这里的距离是栅格的距离
-  unsigned int di = (i - src_i) > 0 ? (i - src_i) : (src_i - i);
-  unsigned int dj = (j - src_j) > 0 ? (j - src_j) : (src_j - j);
-  //unsigned int di = abs(i - src_i);
-  //unsigned int dj = abs(j - src_j);
+  //unsigned int di = (i - src_i) > 0 ? (i - src_i) : (src_i - i);
+  //unsigned int dj = (j - src_j) > 0 ? (j - src_j) : (src_j - j);
+  unsigned int di = abs(int(i - src_i));
+  unsigned int dj = abs(int(j - src_j));
   double distance = cdm->distances_[di][dj];
 
   if (distance > cdm->cell_radius_)
