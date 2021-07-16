@@ -145,6 +145,7 @@ void ComputeHessianAndb(map_t *map, Eigen::Vector3d now_pose,
         Eigen::Vector2d laser_pts_i = GN_TransPoint(laser_pt, Trans);
         Eigen::Vector3d ans_interp = InterpMapValueWithDerivatives(map, laser_pts_i);
 
+        //(1 - ans_interp(0)) <=> [1 - M(S_i(T))]
         b[0] += ans_interp(1) * (1 - ans_interp(0));
         b[1] += ans_interp(2) * (1 - ans_interp(0));
 
