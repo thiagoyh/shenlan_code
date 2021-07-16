@@ -193,10 +193,10 @@ void GaussianNewtonOptimization(map_t *map, Eigen::Vector3d &init_pose, std::vec
         {
             Eigen::Vector3d res(H.inverse() * b);
 
-            if (res[2] > 0.25)
-                res[2] = 0.25;
-            if (res[2] < -0.25)
-                res[2] = -0.25;
+            if (res[2] > 0.20)
+                res[2] = 0.20;
+            if (res[2] < -0.20)
+                res[2] = -0.20;
             now_pose += res;
         }
         //END OF TODO
