@@ -100,10 +100,7 @@ Eigen::Vector3d InterpMapValueWithDerivatives(map_t *map, Eigen::Vector2d &coord
     double delta_y = (coords(1) - map->origin_y) / map->resolution + 0.5 + map->size_y / 2 - cell_y;
 
     std::vector<double> score(4, 0);
-    // score[0] = map->cells[MAP_INDEX(map, cell_x, cell_y)].score;
-    // score[1] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y)].score;
-    // score[2] = map->cells[MAP_INDEX(map, cell_x, cell_y + 1)].score;
-    // score[3] = map->cells[MAP_INDEX(map, cell_x + 1, cell_y + 1)].score;
+
     int tmp_x[4] = {0, 1, 1, 0};
     int tmp_y[4] = {0, 0, 1, 1};
     for (int i = 0; i != 4; ++i)
