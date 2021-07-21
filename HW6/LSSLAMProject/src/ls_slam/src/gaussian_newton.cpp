@@ -147,10 +147,9 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
         Eigen::Vector3d delta_B = (ei.transpose() * infoMatrix * Bi).transpose();
         for (int index = 0; index != 3; ++index)
         {
-            b(i + index) += delta_A(i);
+            b(tmpEdge.xi + index) += delta_A(index);
+            b(tmpEdge.xj + index) += delta_B(index);
         }
-        b(tmpEdge.xi) += delta_A(0);
-        b(tmpEdge.xj) += delta_B(1);
         //TODO--End
     }
 
