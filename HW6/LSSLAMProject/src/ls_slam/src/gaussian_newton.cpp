@@ -79,6 +79,28 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
 
     Eigen::Matrix3d Aij, Bij;
 
+    Aij.setZero();
+    Bij.setZero();
+
+    Eigen::Matrix2d Ri = Xi.block(0, 0, 2, 2);
+    Eigen::Matrix2d Rj = Xj.block(0, 0, 2, 2);
+    Eigen::Matrix2d Rij = (Ri.inverse() * Rj);
+
+    Eigen::Vector2d tij;
+    tij << xj(0) - xi(0), xj(1) - xi(1);
+
+    //Eigen::Matrix2d translation1 = Rij.transpose();
+    Eigen::Matrix2d translation;
+    translation << -sin(xi(2)), -cos(xi(2)), cos(xi(2)), -sin(xi(2));
+    Eigen::Vector2d tmpt = Rij.transpose() * translation * tij;
+
+    Aij.block(0, 0, 2, 2) = -Rij.transpose() * Ri.transpose();
+    Aij(2, 2) = -1;
+    Aij(0, 2) = tmpt(0);
+    Aij(1, 2) = tmpt(1);
+
+    Bij.block(0, 0, 2, 2) = Rij.transpose() * Ri.transpose();
+    Bij(2, 2) = 1;
     //TODO--end
 }
 
@@ -121,6 +143,14 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
         CalcJacobianAndError(xi, xj, z, ei, Ai, Bi);
 
         //TODO--Start
+        Eigen::Vector3d delta_A = (ei.transpose() * infoMatrix * Ai).transpose();
+        Eigen::Vector3d delta_B = (ei.transpose() * infoMatrix * Bi).transpose();
+        for (int index = 0; index != 3; ++index)
+        {
+            b(i + index) += delta_A(i);
+        }
+        b(tmpEdge.xi) += delta_A(0);
+        b(tmpEdge.xj) += delta_B(1);
         //TODO--End
     }
 
