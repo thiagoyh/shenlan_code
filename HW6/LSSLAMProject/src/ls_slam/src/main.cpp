@@ -144,7 +144,11 @@ int main(int argc, char **argv)
 
         //进行更新
         //TODO--Start
-
+        for (int it = 0; it != Vertexs.size(); ++it)
+        {
+            for (int index = 0; index != 3; ++index)
+                Vertexs[it](index) = dx(3 * it + index);
+        }
         //TODO--End
 
         double maxError = -1;
