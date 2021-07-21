@@ -162,7 +162,7 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     Eigen::VectorXd dx;
 
     //TODO--Start
-
+    dx = -H.inverse() * b;
     //TODO-End
 
     return dx;
