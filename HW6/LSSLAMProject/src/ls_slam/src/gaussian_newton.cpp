@@ -150,6 +150,11 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
             b(tmpEdge.xi + index) += delta_A(index);
             b(tmpEdge.xj + index) += delta_B(index);
         }
+
+        H.block(tmpEdge.xi, tmpEdge.xi, tmpEdge.xi + 3, tmpEdge.xi + 3) += Ai.transpose() * infoMatrix * Ai;
+        H.block(tmpEdge.xi, tmpEdge.xj, tmpEdge.xi + 3, tmpEdge.xj + 3) += Ai.transpose() * infoMatrix * Bi;
+        H.block(tmpEdge.xj, tmpEdge.xi, tmpEdge.xj + 3, tmpEdge.xi + 3) += Bi.transpose() * infoMatrix * Ai;
+        H.block(tmpEdge.xj, tmpEdge.xj, tmpEdge.xj + 3, tmpEdge.xj + 3) += Bi.transpose() * infoMatrix * Bi;
         //TODO--End
     }
 
