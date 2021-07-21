@@ -7,36 +7,34 @@
 
 #include <iostream>
 
-
 //位姿-->转换矩阵
 Eigen::Matrix3d PoseToTrans(Eigen::Vector3d x)
 {
     Eigen::Matrix3d trans;
-    trans << cos(x(2)),-sin(x(2)),x(0),
-             sin(x(2)), cos(x(2)),x(1),
-                     0,         0,    1;
+    trans << cos(x(2)), -sin(x(2)), x(0),
+        sin(x(2)), cos(x(2)), x(1),
+        0, 0, 1;
 
     return trans;
 }
-
 
 //转换矩阵－－＞位姿
 Eigen::Vector3d TransToPose(Eigen::Matrix3d trans)
 {
     Eigen::Vector3d pose;
-    pose(0) = trans(0,2);
-    pose(1) = trans(1,2);
-    pose(2) = atan2(trans(1,0),trans(0,0));
+    pose(0) = trans(0, 2);
+    pose(1) = trans(1, 2);
+    pose(2) = atan2(trans(1, 0), trans(0, 0));
 
     return pose;
 }
 
 //计算整个pose-graph的误差
-double ComputeError(std::vector<Eigen::Vector3d>& Vertexs,
-                    std::vector<Edge>& Edges)
+double ComputeError(std::vector<Eigen::Vector3d> &Vertexs,
+                    std::vector<Edge> &Edges)
 {
     double sumError = 0;
-    for(int i = 0; i < Edges.size();i++)
+    for (int i = 0; i < Edges.size(); i++)
     {
         Edge tmpEdge = Edges[i];
         Eigen::Vector3d xi = Vertexs[tmpEdge.xi];
@@ -46,18 +44,16 @@ double ComputeError(std::vector<Eigen::Vector3d>& Vertexs,
 
         Eigen::Matrix3d Xi = PoseToTrans(xi);
         Eigen::Matrix3d Xj = PoseToTrans(xj);
-        Eigen::Matrix3d Z  = PoseToTrans(z);
+        Eigen::Matrix3d Z = PoseToTrans(z);
 
-        Eigen::Matrix3d Ei = Z.inverse() *  Xi.inverse() * Xj;
+        Eigen::Matrix3d Ei = Z.inverse() * Xi.inverse() * Xj;
 
         Eigen::Vector3d ei = TransToPose(Ei);
-
 
         sumError += ei.transpose() * infoMatrix * ei;
     }
     return sumError;
 }
-
 
 /**
  * @brief CalcJacobianAndError
@@ -69,10 +65,20 @@ double ComputeError(std::vector<Eigen::Vector3d>& Vertexs,
  * @param Ai    相对于xi的Jacobian矩阵
  * @param Bi    相对于xj的Jacobian矩阵
  */
-void CalcJacobianAndError(Eigen::Vector3d xi,Eigen::Vector3d xj,Eigen::Vector3d z,
-                          Eigen::Vector3d& ei,Eigen::Matrix3d& Ai,Eigen::Matrix3d& Bi)
+void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3d z,
+                          Eigen::Vector3d &ei, Eigen::Matrix3d &Ai, Eigen::Matrix3d &Bi)
 {
     //TODO--Start
+    Eigen::Matrix3d Xi = PoseToTrans(xi);
+    Eigen::Matrix3d Xj = PoseToTrans(xj);
+    Eigen::Matrix3d Z = PoseToTrans(z);
+
+    Eigen::Matrix3d Ei = Z.inverse() * Xi.inverse() * Xj;
+
+    Eigen::Vector3d ei = TransToPose(Ei);
+
+    Eigen::Matrix3d Aij, Bij;
+
     //TODO--end
 }
 
@@ -83,11 +89,11 @@ void CalcJacobianAndError(Eigen::Vector3d xi,Eigen::Vector3d xj,Eigen::Vector3d 
  * @param Edges     图中的所有边
  * @return          位姿的增量
  */
-Eigen::VectorXd  LinearizeAndSolve(std::vector<Eigen::Vector3d>& Vertexs,
-                                   std::vector<Edge>& Edges)
+Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
+                                  std::vector<Edge> &Edges)
 {
     //申请内存
-    Eigen::MatrixXd H(Vertexs.size() * 3,Vertexs.size() * 3);
+    Eigen::MatrixXd H(Vertexs.size() * 3, Vertexs.size() * 3);
     Eigen::VectorXd b(Vertexs.size() * 3);
 
     H.setZero();
@@ -96,10 +102,10 @@ Eigen::VectorXd  LinearizeAndSolve(std::vector<Eigen::Vector3d>& Vertexs,
     //固定第一帧
     Eigen::Matrix3d I;
     I.setIdentity();
-    H.block(0,0,3,3) += I;
+    H.block(0, 0, 3, 3) += I;
 
     //构造H矩阵　＆ b向量
-    for(int i = 0; i < Edges.size();i++)
+    for (int i = 0; i < Edges.size(); i++)
     {
         //提取信息
         Edge tmpEdge = Edges[i];
@@ -112,9 +118,9 @@ Eigen::VectorXd  LinearizeAndSolve(std::vector<Eigen::Vector3d>& Vertexs,
         Eigen::Vector3d ei;
         Eigen::Matrix3d Ai;
         Eigen::Matrix3d Bi;
-        CalcJacobianAndError(xi,xj,z,ei,Ai,Bi);
+        CalcJacobianAndError(xi, xj, z, ei, Ai, Bi);
 
-         //TODO--Start
+        //TODO--Start
         //TODO--End
     }
 
@@ -127,14 +133,3 @@ Eigen::VectorXd  LinearizeAndSolve(std::vector<Eigen::Vector3d>& Vertexs,
 
     return dx;
 }
-
-
-
-
-
-
-
-
-
-
-
