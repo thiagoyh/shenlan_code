@@ -1,0 +1,6 @@
+<launch>
+    <node name="ls_slam" pkg="ls_slam" type="ls_slam" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" required="true"
+
+</launch>

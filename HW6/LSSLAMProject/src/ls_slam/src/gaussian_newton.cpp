@@ -75,12 +75,12 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
 
     Eigen::Matrix3d Ei = Z.inverse() * Xi.inverse() * Xj;
 
-    Eigen::Vector3d ei = TransToPose(Ei);
+    ei = TransToPose(Ei);
 
-    Eigen::Matrix3d Aij, Bij;
+    //Eigen::Matrix3d Aij, Bij;
 
-    Aij.setZero();
-    Bij.setZero();
+    Ai.setZero();
+    Bi.setZero();
 
     Eigen::Matrix2d Ri = Xi.block(0, 0, 2, 2);
     Eigen::Matrix2d Rj = Xj.block(0, 0, 2, 2);
@@ -94,13 +94,19 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
     translation << -sin(xi(2)), -cos(xi(2)), cos(xi(2)), -sin(xi(2));
     Eigen::Vector2d tmpt = Rij.transpose() * translation * tij;
 
-    Aij.block(0, 0, 2, 2) = -Rij.transpose() * Ri.transpose();
-    Aij(2, 2) = -1;
-    Aij(0, 2) = tmpt(0);
-    Aij(1, 2) = tmpt(1);
+    //std::cout << "Jacobian matrix begins to calculate!" << std::endl;
 
-    Bij.block(0, 0, 2, 2) = Rij.transpose() * Ri.transpose();
-    Bij(2, 2) = 1;
+    Ai.block(0, 0, 2, 2) = -Rij.transpose() * Ri.transpose();
+    Ai(2, 2) = -1;
+    Ai(0, 2) = tmpt(0);
+    Ai(1, 2) = tmpt(1);
+
+    Bi.block(0, 0, 2, 2) = Rij.transpose() * Ri.transpose();
+    Bi(2, 2) = 1;
+
+    //std::cout << "Jacobian matrix is calculated!" << std::endl;
+    //Ai = Aij;
+    //Bi = Bij;
     //TODO--end
 }
 
@@ -143,18 +149,26 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
         CalcJacobianAndError(xi, xj, z, ei, Ai, Bi);
 
         //TODO--Start
+        std::cerr << "Hessian matrix begins to calculate!\n";
         Eigen::Vector3d delta_A = (ei.transpose() * infoMatrix * Ai).transpose();
         Eigen::Vector3d delta_B = (ei.transpose() * infoMatrix * Bi).transpose();
+        //std::cerr << "Hessian matrix is calculated! 1\n";
         for (int index = 0; index != 3; ++index)
         {
             b(tmpEdge.xi + index) += delta_A(index);
             b(tmpEdge.xj + index) += delta_B(index);
         }
 
-        H.block(tmpEdge.xi, tmpEdge.xi, tmpEdge.xi + 3, tmpEdge.xi + 3) += Ai.transpose() * infoMatrix * Ai;
-        H.block(tmpEdge.xi, tmpEdge.xj, tmpEdge.xi + 3, tmpEdge.xj + 3) += Ai.transpose() * infoMatrix * Bi;
-        H.block(tmpEdge.xj, tmpEdge.xi, tmpEdge.xj + 3, tmpEdge.xi + 3) += Bi.transpose() * infoMatrix * Ai;
-        H.block(tmpEdge.xj, tmpEdge.xj, tmpEdge.xj + 3, tmpEdge.xj + 3) += Bi.transpose() * infoMatrix * Bi;
+        std::cerr << "Hessian matrix is calculated! 2\n";
+        H.block(tmpEdge.xi * 3, tmpEdge.xi * 3, tmpEdge.xi * 3 + 3, tmpEdge.xi * 3 + 3) += Ai.transpose() * infoMatrix * Ai;
+        std::cerr << "Hessian matrix is calculated! 3\n";
+        H.block(tmpEdge.xi * 3, tmpEdge.xj * 3, tmpEdge.xi * 3 + 3, tmpEdge.xj * 3 + 3) += Ai.transpose() * infoMatrix * Bi;
+        std::cerr << "Hessian matrix is calculated! 4\n";
+        H.block(tmpEdge.xj * 3, tmpEdge.xi * 3, tmpEdge.xj * 3 + 3, tmpEdge.xi * 3 + 3) += Bi.transpose() * infoMatrix * Ai;
+        std::cerr << "Hessian matrix is calculated! 5\n";
+        H.block(tmpEdge.xj * 3, tmpEdge.xj * 3, tmpEdge.xj * 3 + 3, tmpEdge.xj * 3 + 3) += Bi.transpose() * infoMatrix * Bi;
+
+        std::cerr << "Hessian matrix is calculated!\n";
         //TODO--End
     }
 
@@ -162,7 +176,9 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     Eigen::VectorXd dx;
 
     //TODO--Start
+    std::cerr << "dx begins to calculate!\n";
     dx = -H.inverse() * b;
+    std::cerr << "dx is calculated!\n";
     //TODO-End
 
     return dx;
