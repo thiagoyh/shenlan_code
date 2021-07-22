@@ -4,6 +4,8 @@
 #include <eigen3/Eigen/Householder>
 #include <eigen3/Eigen/Cholesky>
 #include <eigen3/Eigen/LU>
+#include <ctime>
+#include <time.h>
 
 #include <iostream>
 
@@ -93,12 +95,9 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
     Eigen::Vector2d tij;
     tij << z(0), z(1);
 
-    //Eigen::Matrix2d translation1 = Rij.transpose();
     Eigen::Matrix2d translation;
     translation << -sin(xi(2)), cos(xi(2)), -cos(xi(2)), -sin(xi(2));
     Eigen::Vector2d tmpt = Rij.transpose() * translation * (tj - ti);
-
-    //std::cout << "Jacobian matrix begins to calculate!" << std::endl;
 
     Ai.block(0, 0, 2, 2) = -Rij.transpose() * Ri.transpose();
     Ai(2, 2) = -1;
@@ -108,9 +107,6 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
     Bi.block(0, 0, 2, 2) = Rij.transpose() * Ri.transpose();
     Bi(2, 2) = 1;
 
-    //std::cout << "Jacobian matrix is calculated!" << std::endl;
-    //Ai = Aij;
-    //Bi = Bij;
     //TODO--end
 }
 
@@ -137,7 +133,7 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     H.block(0, 0, 3, 3) += I;
 
     //构造H矩阵　＆ b向量
-    for (int i = 0; i < Edges.size(); i++)
+    for (int i = 0; i != Edges.size(); i++)
     {
         //提取信息
         Edge tmpEdge = Edges[i];
@@ -173,7 +169,11 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     Eigen::VectorXd dx;
 
     //TODO--Start
-    dx = -H.colPivHouseholderQr().solve(b);
+    clock_t start = clock();
+    std::cout << "dx begins to calculate!!!" << std::endl;
+    dx = -H.partialPivLu().solve(b);
+    std::cout << "dx is calculated!!!" << std::endl
+              << "this process takes " << clock() - start << "s" << std::endl;
     //TODO-End
 
     return dx;
