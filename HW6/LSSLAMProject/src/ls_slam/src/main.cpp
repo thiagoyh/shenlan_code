@@ -107,6 +107,7 @@ void PublishGraphForVisulization(ros::Publisher *pub,
 
 int main(int argc, char **argv)
 {
+    //173413
     ros::init(argc, argv, "ls_slam");
 
     ros::NodeHandle nodeHandle;
