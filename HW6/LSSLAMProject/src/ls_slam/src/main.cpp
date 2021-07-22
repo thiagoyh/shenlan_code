@@ -165,7 +165,7 @@ int main(int argc, char **argv)
         if (maxError < epsilon)
             break;
     }
-    std::cout << "the optimization process takes " << (clock() - start) / 1000 << "s" << std::endl;
+    std::cout << "the optimization process takes " << (clock() - start) / CLOCKS_PER_SEC << "s" << std::endl;
     double finalError = ComputeError(Vertexs, Edges);
 
     std::cout << "FinalError:" << finalError << std::endl;
