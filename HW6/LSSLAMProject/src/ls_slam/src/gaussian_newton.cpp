@@ -95,7 +95,7 @@ void CalcJacobianAndError(Eigen::Vector3d xi, Eigen::Vector3d xj, Eigen::Vector3
 
     //Eigen::Matrix2d translation1 = Rij.transpose();
     Eigen::Matrix2d translation;
-    translation << -sin(xi(2)), -cos(xi(2)), cos(xi(2)), -sin(xi(2));
+    translation << -sin(xi(2)), cos(xi(2)), -cos(xi(2)), -sin(xi(2));
     Eigen::Vector2d tmpt = Rij.transpose() * translation * (tj - ti);
 
     //std::cout << "Jacobian matrix begins to calculate!" << std::endl;
@@ -153,7 +153,7 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
         CalcJacobianAndError(xi, xj, z, ei, Ai, Bi);
 
         //TODO--Start
-        std::cerr << "Hessian matrix begins to calculate!\n";
+        //std::cerr << "Hessian matrix begins to calculate!\n";
         Eigen::Vector3d delta_A = (ei.transpose() * infoMatrix * Ai).transpose();
         Eigen::Vector3d delta_B = (ei.transpose() * infoMatrix * Bi).transpose();
         //std::cerr << "Hessian matrix is calculated! 1\n";
@@ -163,16 +163,16 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
             b(3 * tmpEdge.xj + index) += delta_B(index);
         }
 
-        std::cerr << "Hessian matrix is calculated! 2\n";
+        //std::cerr << "Hessian matrix is calculated! 2\n";
         H.block(tmpEdge.xi * 3, tmpEdge.xi * 3, 3, 3) += Ai.transpose() * infoMatrix * Ai;
-        std::cerr << "Hessian matrix is calculated! 3\n";
+        //std::cerr << "Hessian matrix is calculated! 3\n";
         H.block(tmpEdge.xi * 3, tmpEdge.xj * 3, 3, 3) += Ai.transpose() * infoMatrix * Bi;
-        std::cerr << "Hessian matrix is calculated! 4\n";
+        //std::cerr << "Hessian matrix is calculated! 4\n";
         H.block(tmpEdge.xj * 3, tmpEdge.xi * 3, 3, 3) += Bi.transpose() * infoMatrix * Ai;
-        std::cerr << "Hessian matrix is calculated! 5\n";
+        //std::cerr << "Hessian matrix is calculated! 5\n";
         H.block(tmpEdge.xj * 3, tmpEdge.xj * 3, 3, 3) += Bi.transpose() * infoMatrix * Bi;
 
-        std::cerr << "Hessian matrix is calculated!\n";
+        //std::cerr << "Hessian matrix is calculated!\n";
         //TODO--End
     }
 
@@ -180,9 +180,9 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     Eigen::VectorXd dx;
 
     //TODO--Start
-    std::cerr << "dx begins to calculate!\n";
+    //std::cerr << "dx begins to calculate!\n";
     dx = -H.colPivHouseholderQr().solve(b);
-    std::cerr << "dx is calculated!\n";
+    //std::cerr << "dx is calculated!\n";
     //TODO-End
 
     return dx;

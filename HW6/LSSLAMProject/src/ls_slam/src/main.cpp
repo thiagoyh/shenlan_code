@@ -139,7 +139,7 @@ int main(int argc, char **argv)
 
     for (int i = 0; i < maxIteration; i++)
     {
-        std::cout << "Iterations:" << i << std::endl;
+        //std::cout << "Iterations:" << i << std::endl;
         Eigen::VectorXd dx = LinearizeAndSolve(Vertexs, Edges);
 
         //进行更新
