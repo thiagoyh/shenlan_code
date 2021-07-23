@@ -176,6 +176,13 @@ int main(int argc, char **argv)
     optimizer.optimize(100);
     std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
     std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
+    std::cout << "this optimization process takes " << time_used.count() << " seconds!!" << std::endl;
+
+    for (int i = 0; i != Vertexs.size(); ++i)
+    {
+        Slam_Vertex *v_estimate = static_cast<Slam_Vertex *>(optimizer.vertices[i]);
+        Vertexs[i] = v_estimate->estimate();
+    }
 
     PublishGraphForVisulization(&afterGraphPub,
                                 Vertexs,
