@@ -55,6 +55,7 @@ class Slam_Edge : public g2o::BaseUnaryEdge<3, Eigen::Vector3d, Slam_Vertex>
 public:
     EIGEN_MAKE_ALIGNED_OPERATOR_NEW
 
+    Slam_Edge() : BaseUnaryEdge() {}
     virtual void computeError()
     {
         const Slam_Vertex *v_1 = static_cast<const Slam_Vertex *>(_vertices[0]);
@@ -72,7 +73,9 @@ public:
         _error = TransToPose(Ei);
     }
 
-    virtual void linearizeOplus()
-    {
-    }
+    virtual bool read(std::istream &in) {}
+    virtual bool write(std::ostream &out) const {}
+    // virtual void linearizeOplus()
+    // {
+    // }
 };

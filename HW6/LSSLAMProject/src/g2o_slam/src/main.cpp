@@ -138,9 +138,44 @@ int main(int argc, char **argv)
     typedef g2o::BlockSolver<g2o::BlockSolverTraits<3, 3>> Block;
 
     Block::LinearSolverType *linearSolver = new g2o::LinearSolverDense<Block::PoseMatrixType>();
-    Block *solver_ptr = new Block(linearSolver);
+    Block *solver_ptr = new Block(std::unique_ptr<Block::LinearSolverType>(linearSolver));
 
-    g2o::OptimizationAlgorithmLevenberg *solver = new g2o::OptimizationAlgorithmLevenberg(solver_ptr);
+    g2o::OptimizationAlgorithmLevenberg *solver = new g2o::OptimizationAlgorithmLevenberg(std::unique_ptr<Block>(solver_ptr));
+
+    g2o::SparseOptimizer optimizer;
+    optimizer.setAlgorithm(solver);
+    optimizer.setVerbose(true);
+
+    //向图中添加顶点
+    for (int i = 0; i != Vertexs.size(); ++i)
+    {
+        Slam_Vertex *v = new Slam_Vertex();
+        v->setEstimate(Vertexs[i]);
+        v->setId(i);
+        if (!i)
+            v->setFixed(true);
+        optimizer.addVertex(v);
+    }
+
+    //向图中增加边
+    for (int i = 0; i != Edges.size(); ++i)
+    {
+        Slam_Edge *edge = new Slam_Edge();
+        Edge tmpt = Edges[i];
+        edge->setId(i);
+        edge->setVertex(0, optimizer.vertices()[tmpt.xi]);
+        edge->setVertex(1, optimizer.vertices()[tmpt.xj]);
+        edge->setMeasurement(tmpt.measurement);
+        edge->setInformation(tmpt.infoMatrix);
+        optimizer.addEdge(edge);
+    }
+
+    std::cout << "start optimization!" << std::endl;
+    std::chrono::steady_clock::time_point t1 = std::chrono::steady_clock::now();
+    optimizer.initializeOptimization();
+    optimizer.optimize(100);
+    std::chrono::steady_clock::time_point t2 = std::chrono::steady_clock::now();
+    std::chrono::duration<double> time_used = std::chrono::duration_cast<std::chrono::duration<double>>(t2 - t1);
 
     PublishGraphForVisulization(&afterGraphPub,
                                 Vertexs,
