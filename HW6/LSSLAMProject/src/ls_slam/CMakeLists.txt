@@ -9,7 +9,7 @@ find_package(catkin REQUIRED COMPONENTS
 )
 
 find_package(Eigen3 REQUIRED)
-find_package(G2O REQUIRED)
+
 
 
 catkin_package(
@@ -24,11 +24,11 @@ include_directories(
   include
   include/ls_slam
   ${catkin_INCLUDE_DIRS}  ${EIGEN_INCLUDE_DIRS}
-  ${G2O_INCLUDE_DIR}
+
 )
 
 
 
-add_executable(ls_slam src/main.cpp src/readfile.cpp)
+add_executable(ls_slam src/main.cpp src/readfile.cpp src/gaussian_newton.cpp)
 target_link_libraries(ls_slam ${catkin_LIBRARIES} ${CSPARSE_LIBRARY} )
 
