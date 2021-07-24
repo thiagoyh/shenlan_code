@@ -9,15 +9,9 @@ template <typename T>
 Eigen::Matrix<T, 3, 3> PoseToTrans(Eigen::Matrix<T, 3, 1> xi)
 {
     Eigen::Matrix<T, 3, 3> Xi;
-    Xi(0, 0) = cos(xi(2));
-    Xi(0, 1) = -sin(xi(2));
-    Xi(0, 2) = xi(0);
-    Xi(1, 0) = sin(xi(2));
-    Xi(1, 1) = cos(xi(2));
-    Xi(1, 2) = xi(1);
-    Xi(2, 0) = T(0);
-    Xi(2, 1) = T(0);
-    Xi(2, 2) = T(1);
+    Xi << cos(xi(2)), -sin(xi(2)), xi(0),
+        sin(xi(2)), cos(xi(2)), xi(1),
+        T(0), T(0), T(1);
     return Xi;
 }
 
