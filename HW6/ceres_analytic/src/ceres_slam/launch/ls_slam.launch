@@ -1,0 +1,7 @@
+<launch>
+    <node name="ls_slam_ceres" pkg="ceres_slam" type="ls_slam_ceres" output="screen" />
+
+    <node name="rviz" pkg="rviz" type="rviz" required="true"
+    args="-d $(find ceres_slam)/config_files/rviz.rviz" />
+
+</launch>
