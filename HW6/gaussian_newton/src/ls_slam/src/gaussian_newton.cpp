@@ -169,11 +169,10 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     Eigen::VectorXd dx;
 
     //TODO--Start
-    clock_t start = clock();
+
     std::cout << "dx begins to calculate!!!" << std::endl;
     dx = -H.partialPivLu().solve(b);
-    std::cout << "dx is calculated!!!" << std::endl
-              << "this process takes " << clock() - start << "ms" << std::endl;
+
     //TODO-End
 
     return dx;

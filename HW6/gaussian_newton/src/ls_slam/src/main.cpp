@@ -117,8 +117,8 @@ int main(int argc, char **argv)
     beforeGraphPub = nodeHandle.advertise<visualization_msgs::MarkerArray>("beforePoseGraph", 1, true);
     afterGraphPub = nodeHandle.advertise<visualization_msgs::MarkerArray>("afterPoseGraph", 1, true);
 
-    std::string VertexPath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/LSSLAMProject/src/ls_slam/data/intel-v.dat";
-    std::string EdgePath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/LSSLAMProject/src/ls_slam/data/intel-e.dat";
+    std::string VertexPath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/gaussian_newton/src/ls_slam/data/intel-v.dat";
+    std::string EdgePath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/gaussian_newton/src/ls_slam/data/intel-e.dat";
 
     //    std::string VertexPath = "/home/eventec/LSSLAMProject/src/ls_slam/data/intel-v.dat";
     //    std::string EdgePath = "/home/eventec/LSSLAMProject/src/ls_slam/data/intel-e.dat";
@@ -143,8 +143,8 @@ int main(int argc, char **argv)
     {
         std::cout << "Iterations:" << i << std::endl;
         Eigen::VectorXd dx = LinearizeAndSolve(Vertexs, Edges);
-        std::cout << "the value od dx is: " << std::endl
-                  << dx << std::endl;
+        //std::cout << "the value od dx is: " << std::endl
+        //<< dx << std::endl;
         //进行更新
         //TODO--Start
         for (int it = 0; it != Vertexs.size(); ++it)
