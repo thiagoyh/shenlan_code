@@ -24,8 +24,8 @@ include_directories(
 )
 
 
-add_executable(ls_slam_g2o src/main.cpp src/readfile.cpp src/gaussian_newton.cpp)
-target_link_libraries(ls_slam_g2o ${catkin_LIBRARIES} ${CSPARSE_LIBRARY}  ${G2O_LIBS})
+add_executable(ls_slam_ceres src/main.cpp src/readfile.cpp src/gaussian_newton.cpp)
+target_link_libraries(ls_slam_ceres ${catkin_LIBRARIES} ${CERES_LIBRARIES})
 
 
 

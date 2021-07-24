@@ -132,16 +132,15 @@ int main(int argc, char **argv)
     double initError = ComputeError(Vertexs, Edges);
     std::cout << "initError:" << initError << std::endl;
 
-    ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
-    ceres::Problem::Options problem_options;
+    //ceres::LossFunction *loss_function = new ceres::HuberLoss(0.1);
+    //ceres::Problem::Options problem_options;
 
-    ceres::Problem problem(problem_options);
+    ceres::Problem problem;
 
-    for (int i = 0; i != Edges.size(); ++i)
+    for (const auto &edge : Edges)
     {
-        Edge tmpt = Edges[i];
-        ceres::CostFunction *cost_function = optimization::create(tmpt);
-        problem.AddResidualBlock(cost_function, nullptr, Vertexs[tmpt.xi].data(), Vertexs[tmpt.xj].data()); //data()
+        ceres::CostFunction *cost_function = new AnalyticDiffFunction(edge);
+        problem.AddResidualBlock(cost_function, nullptr, Vertexs[edge.xi].data(), Vertexs[edge.xj].data()); //data()
     }
 
     ceres::Solver::Options options;

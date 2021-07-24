@@ -6,63 +6,81 @@
 #include <iostream>
 #include <gaussian_newton.h>
 
-class optimization
+class AnalyticDiffFunction : public ceres::SizedCostFunction<3, 3, 3>
 {
 public:
-    optimization(const Edge &edge) : measurement(edge.measurement), infoMatrix(edge.infoMatrix) {}
+    virtual ~AnalyticDiffFunction() {}
 
-    template <typename T>
-    bool operator()(const T *const xi_, const T *const xj_, T *residual) const
+    AnalyticDiffFunction(const Edge &edge) : measurement(edge.measurement), sqrt_info_matrix(edge.infoMatrix.array().sqrt()) {}
+
+    virtual bool Evaluate(double const *const *parameters, double *residuals, double **jacobians) const
     {
-        Eigen::Matrix<T, 3, 1> xi{xi_[0], xi_[1], xi_[2]};
-        Eigen::Matrix<T, 3, 1> xj{xj_[0], xj_[1], xj_[2]};
-        //Eigen::Matrix<T, 3, 1> z= measurement.template cast<T>();
-        Eigen::Matrix<T, 3, 1> error;
-        Eigen::Matrix<T, 3, 1> z;
-        z << T(measurement(0)), T(measurement(1)), T(measurement(2));
 
-        Eigen::Matrix<T, 3, 3> infoMatrix_;
-        infoMatrix_ << T(infoMatrix(0, 0)), T(infoMatrix(0, 1)), T(infoMatrix(0, 2)),
-            T(infoMatrix(1, 0)), T(infoMatrix(1, 1)), T(infoMatrix(1, 2)),
-            T(infoMatrix(2, 0)), T(infoMatrix(2, 1)), T(infoMatrix(2, 2));
+        Eigen::Vector3d xi{parameters[0][0], parameters[0][1], parameters[0][2]};
+        Eigen::Vector3d xj{parameters[1][0], parameters[1][1], parameters[1][2]};
 
-        Eigen::Matrix<T, 3, 3> Xi = PoseToTrans(xi);
-        Eigen::Matrix<T, 3, 3> Xj = PoseToTrans(xj);
-        Eigen::Matrix<T, 3, 3> Z = PoseToTrans(z);
+        Eigen::Map<Eigen::Vector3d> error_ij{residuals};
+        Eigen::Matrix3d Ai;
+        Eigen::Matrix3d Bi;
 
-        Eigen::Matrix<T, 2, 2> Ri = Xi.block(0, 0, 2, 2);
-        Eigen::Matrix<T, 2, 2> Rj = Xj.block(0, 0, 2, 2);
-        Eigen::Matrix<T, 2, 2> Rij = Z.block(0, 0, 2, 2);
+        Eigen::Matrix3d Xi = PoseToTrans(xi);
+        Eigen::Matrix2d Ri = Xi.block(0, 0, 2, 2);
+        Eigen::Vector2d ti{xi(0), xi(1)};
 
-        Eigen::Matrix<T, 3, 3> Ei = Z.inverse() * Xi.inverse() * Xj;
-        Eigen::Vector3d pose;
+        Eigen::Matrix3d Xj = PoseToTrans(xj);
+        Eigen::Matrix2d Rj = Xj.block(0, 0, 2, 2);
+        Eigen::Vector2d tj{xj(0), xj(1)};
 
-        Eigen::Matrix<T, 3, 1> ei；
-            pose(0) = trans(0, 2);
-        pose(1) = trans(1, 2);
-        pose(2) = atan2(trans(1, 0), trans(0, 0));
+        Eigen::Matrix3d Z = PoseToTrans(measurement);
+        Eigen::Matrix2d Rij = Z.block(0, 0, 2, 2);
+        Eigen::Vector2d tij{measurement(0), measurement(1)};
 
-        //Eigen::Matrix<T, 3, 1> error;
-        //error << T(ei(0)), T(ei(1)), T(ei(2));
-        error(0) = T(ei(0));
-        error(1) = T(ei(1));
-        error(2) = T(ei(2));
+        Eigen::Matrix2d dRiT_dtheta;       //  derivative of Ri^T over theta
+        dRiT_dtheta(0, 0) = -1 * Ri(1, 0); //  cosX -> -sinX
+        dRiT_dtheta(0, 1) = 1 * Ri(0, 0);  //  sinX ->  cosX
+        dRiT_dtheta(1, 0) = -1 * Ri(0, 0); // -sinX -> -cosX
+        dRiT_dtheta(1, 1) = -1 * Ri(1, 0); //  cosX -> -sinX
 
-        error = infoMatrix_ * error;
+        // calcuate error & normalize error on theta
+        error_ij.segment<2>(0) = Rij.transpose() * (Ri.transpose() * (tj - ti) - tij);
+        error_ij(2) = xj(2) - xi(2) - measurement(2);
+        if (error_ij(2) > M_PI)
+        {
+            error_ij(2) -= 2 * M_PI;
+        }
+        else if (error_ij(2) < -1 * M_PI)
+        {
+            error_ij(2) += 2 * M_PI;
+        }
 
-        residual[0] = T(error(0));
-        residual[1] = T(error(1));
-        residual[2] = T(error(2));
+        Ai.setZero();
+        Ai.block(0, 0, 2, 2) = -Rij.transpose() * Ri.transpose();
+        Ai.block(0, 2, 2, 1) = Rij.transpose() * dRiT_dtheta * (tj - ti);
+        Ai(2, 2) = -1.0;
+
+        Bi.setIdentity();
+        Bi.block(0, 0, 2, 2) = Rij.transpose() * Ri.transpose();
+
+        error_ij = sqrt_info_matrix * error_ij;
+
+        if (jacobians)
+        {
+            if (jacobians[0])
+            {
+                Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_xi(jacobians[0]);
+                jacobian_xi = sqrt_info_matrix * Ai;
+            }
+            if (jacobians[1])
+            {
+                Eigen::Map<Eigen::Matrix<double, 3, 3, Eigen::RowMajor>> jacobian_xj(jacobians[1]);
+                jacobian_xj = sqrt_info_matrix * Bi;
+            }
+        }
 
         return true;
     }
 
-    static ceres::CostFunction *create(const Edge &edge)
-    {
-        return (new ceres::AutoDiffCostFunction<optimization, 3, 3, 3>(new optimization(edge)));
-    }
-
 private:
     Eigen::Vector3d measurement;
-    Eigen::Matrix3d infoMatrix;
+    Eigen::Matrix3d sqrt_info_matrix;
 };
