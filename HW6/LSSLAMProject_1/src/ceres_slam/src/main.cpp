@@ -116,8 +116,8 @@ int main(int argc, char **argv)
     beforeGraphPub = nodeHandle.advertise<visualization_msgs::MarkerArray>("beforePoseGraph", 1, true);
     afterGraphPub = nodeHandle.advertise<visualization_msgs::MarkerArray>("afterPoseGraph", 1, true);
 
-    std::string VertexPath = "/home/eventec/LSSLAMProject/src/ls_slam/data/test_quadrat-v.dat";
-    std::string EdgePath = "/home/eventec/LSSLAMProject/src/ls_slam/data/test_quadrat-e.dat";
+    std::string VertexPath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/LSSLAMProject/src/ls_slam/data/intel-v.dat";
+    std::string EdgePath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW6/LSSLAMProject/src/ls_slam/data/intel-e.dat";
 
     std::vector<Eigen::Vector3d> Vertexs;
     std::vector<Edge> Edges;
@@ -152,6 +152,8 @@ int main(int argc, char **argv)
     std::cout << summary.FullReport() << std::endl;
     //problem.AddParameterBlock()
 
+    double finalError = ComputeError(Vertexs, Edges);
+    std::cout << "FinalError:" << finalError << std::endl;
     PublishGraphForVisulization(&afterGraphPub,
                                 Vertexs,
                                 Edges, 1);

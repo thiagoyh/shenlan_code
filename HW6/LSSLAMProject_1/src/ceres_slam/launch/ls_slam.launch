@@ -1,7 +1,7 @@
 <launch>
-    <node name="g2o_slam" pkg="g2o_slam" type="g2o_slam" output="screen" />
+    <node name="ls_slam_ceres" pkg="ceres_slam" type="ls_slam_ceres" output="screen" />
 
     <node name="rviz" pkg="rviz" type="rviz" required="true"
-    args="-d $(find g2o_slam)/config_files/rviz.rviz" />
+    args="-d $(find ceres_slam)/config_files/rviz.rviz" />
 
 </launch>
