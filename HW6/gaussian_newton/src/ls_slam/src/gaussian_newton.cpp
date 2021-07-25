@@ -3,6 +3,7 @@
 #include <eigen3/Eigen/Dense>
 #include <eigen3/Eigen/Householder>
 #include <eigen3/Eigen/Cholesky>
+#include <eigen3/Eigen/SparseCholesky>
 #include <eigen3/Eigen/LU>
 #include <ctime>
 #include <time.h>
@@ -171,7 +172,18 @@ Eigen::VectorXd LinearizeAndSolve(std::vector<Eigen::Vector3d> &Vertexs,
     //TODO--Start
 
     std::cout << "dx begins to calculate!!!" << std::endl;
-    dx = -H.partialPivLu().solve(b);
+    Eigen::SimplicialLDLT<Eigen::SparseMatrix<double>> solver;
+    Eigen::SparseMatrix<double> sp_H = H.sparseView();
+    solver.compute(sp_H);
+    if (solver.info() != Eigen::Success)
+    {
+        std::cout << "decomposition failed" << std::endl;
+    }
+    dx = solver.solve(-b);
+    if (solver.info() != Eigen::Success)
+    {
+        std::cout << "decomposition failed" << std::endl;
+    }
 
     //TODO-End
 
