@@ -193,16 +193,27 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
                 continue;
             //update the hitted points
             int index_hit = GridIndexToLinearIndex(map_xy);
-            pMap[index_hit] += mapParams.log_occ;
-            pMap[index_hit] = pMap[index_hit] < mapParams.log_max ? pMap[index_hit] : mapParams.log_max;
+
+            double px = (double)pMap[index_hit] / 100;
+            double lx = std::log(px / (1 - px));
+            lx += mapParams.log_occ;
+
+            pMap[index_hit] += 100 * (1.0 - (1.0 / (1 + std::exp(lx))));
+            pMap[index_hit] = std::min(mapParams.log_max, double(pMap[index_hit]));
 
             //update the missed point;
             std::vector<GridIndex> miss_grid = TraceLine(robotIndex.x, robotIndex.y, map_xy.x, map_xy.y);
+
             for (std::vector<GridIndex>::iterator it = miss_grid.begin(); it != miss_grid.end(); ++it)
             {
                 int miss_index = GridIndexToLinearIndex(*it);
-                pMap[miss_index] += mapParams.log_free;
-                pMap[miss_index] = pMap[miss_index] > mapParams.log_min ? pMap[miss_index] : mapParams.log_min;
+
+                double px = (double)pMap[index_hit] / 100;
+                double lx = std::log(px / (1 - px));
+                lx += mapParams.log_free;
+
+                pMap[miss_index] += 100 * (1.0 - (1.0 / (1 + std::exp(lx))));
+                pMap[miss_index] = std::max(mapParams.log_min, double(pMap[miss_index]));
             }
         }
     }
