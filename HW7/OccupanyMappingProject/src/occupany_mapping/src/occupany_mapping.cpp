@@ -187,12 +187,23 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
             double world_y = sin(theta) * laser_x + cos(theta) * laser_y + robotPose(1);
 
             //start of TODO 对对应的map的cell信息进行更新．（1,2,3题内容）
-            int map_x = std::ceil((world_x - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
-            int map_y = std::ceil((world_y - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
 
-            int index = map_x + map_y * mapParams.width;
-            pMap[index] = 1.0;
-            //end of TODO
+            GridIndex map_xy = ConvertWorld2GridIndex(world_x, world_y);
+            if (!isValidGridIndex(map_xy))
+                continue;
+            //update the hitted points
+            int index_hit = GridIndexToLinearIndex(map_xy);
+            pMap[index_hit] += mapParams.log_occ;
+            pMap[index_hit] = pMap[index_hit] < mapParams.log_max ? pMap[index_hit] : mapParams.log_max;
+
+            //update the missed point;
+            std::vector<GridIndex> miss_grid = TraceLine(robotIndex.x, robotIndex.y, map_xy.x, map_xy.y);
+            for (std::vector<GridIndex>::iterator it = miss_grid.begin(); it != miss_grid.end(); ++it)
+            {
+                int miss_index = GridIndexToLinearIndex(*it);
+                pMap[miss_index] += mapParams.log_free;
+                pMap[miss_index] = pMap[miss_index] > mapParams.log_min ? pMap[miss_index] : mapParams.log_min;
+            }
         }
     }
     //start of TODO 通过计数建图算法或TSDF算法对栅格进行更新（2,3题内容）
