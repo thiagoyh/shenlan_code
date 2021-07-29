@@ -187,9 +187,11 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
             double world_y = sin(theta) * laser_x + cos(theta) * laser_y + robotPose(1);
 
             //start of TODO 对对应的map的cell信息进行更新．（1,2,3题内容）
-            double map_x = std::ceil((world_x - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
-            double map_y = std::ceil((world_y - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
+            int map_x = std::ceil((world_x - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
+            int map_y = std::ceil((world_y - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
 
+            int index = map_x + map_y * mapParams.width;
+            pMap[index] = 1.0;
             //end of TODO
         }
     }
@@ -230,7 +232,6 @@ void PublishMap(ros::Publisher &map_pub)
         }
         else
         {
-
             rosMap.data[i] = pMap[i];
         }
     }

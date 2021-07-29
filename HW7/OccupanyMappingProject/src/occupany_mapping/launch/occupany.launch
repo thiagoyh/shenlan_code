@@ -1,6 +1,6 @@
 <launch>
    <node name="occupany" pkg="occupany_mapping" type="occupany_mapping" output="screen" />
 
-   <node name="rviz" pkg="rviz" type="rviz" required="false" />
+   <node name="rviz" pkg="rviz" type="rviz" required="false" args="-d $(find occupany_mapping)/config_files/rviz.rviz" />
 
 </launch>
