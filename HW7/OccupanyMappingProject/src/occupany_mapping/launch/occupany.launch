@@ -1,0 +1,6 @@
+<launch>
+   <node name="occupany" pkg="occupany_mapping" type="occupany_mapping" output="screen" />
+
+   <node name="rviz" pkg="rviz" type="rviz" required="false" />
+
+</launch>

@@ -187,10 +187,14 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
             double world_y = sin(theta) * laser_x + cos(theta) * laser_y + robotPose(1);
 
             //start of TODO 对对应的map的cell信息进行更新．（1,2,3题内容）
+            double map_x = std::ceil((world_x - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
+            double map_y = std::ceil((world_y - mapParams.origin_x) / mapParams.resolution) + mapParams.offset_x;
+
             //end of TODO
         }
     }
     //start of TODO 通过计数建图算法或TSDF算法对栅格进行更新（2,3题内容）
+
     //end of TODO
     std::cout << "建图完毕" << std::endl;
 }
@@ -248,7 +252,7 @@ int main(int argc, char **argv)
     std::vector<Eigen::Vector3d> robotPoses;
     std::vector<GeneralLaserScan> generalLaserScans;
 
-    std::string basePath = "/home/eventec/OccupanyMappingProject/src/data";
+    std::string basePath = "/home/xcy/my_homework/shenlan_slam/shenlan_code/HW7/OccupanyMappingProject/src/data";
 
     std::string posePath = basePath + "/pose.txt";
     std::string anglePath = basePath + "/scanAngles.txt";
