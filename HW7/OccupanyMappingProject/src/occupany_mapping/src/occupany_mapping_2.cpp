@@ -188,26 +188,38 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
 
             //start of TODO 对对应的map的cell信息进行更新．（1,2,3题内容）
 
-            GridIndex map_xy = ConvertWorld2GridIndex(world_x, world_y);
-            if (!isValidGridIndex(map_xy))
+            GridIndex map_grid = ConvertWorld2GridIndex(world_x, world_y);
+            if (!isValidGridIndex(map_grid))
                 continue;
-            //update the hitted points
-            int index_hit = GridIndexToLinearIndex(map_xy);
-            pMap[index_hit] += mapParams.log_occ;
-            pMap[index_hit] = pMap[index_hit] < mapParams.log_max ? pMap[index_hit] : mapParams.log_max;
 
-            //update the missed point;
-            std::vector<GridIndex> miss_grid = TraceLine(robotIndex.x, robotIndex.y, map_xy.x, map_xy.y);
+            std::vector<GridIndex> miss_grid = TraceLine(robotIndex.x, robotIndex.y, map_grid.x, map_grid.y);
+
             for (std::vector<GridIndex>::iterator it = miss_grid.begin(); it != miss_grid.end(); ++it)
             {
-                int miss_index = GridIndexToLinearIndex(*it);
-                pMap[miss_index] += mapParams.log_free;
-                pMap[miss_index] = pMap[miss_index] > mapParams.log_min ? pMap[miss_index] : mapParams.log_min;
+                int linear_miss = GridIndexToLinearIndex(*it);
+                pMapMisses[linear_miss]++;
             }
+
+            int linear_hit = GridIndexToLinearIndex(map_grid);
+            pMapHits[linear_hit]++;
+            //update the hitted points
         }
     }
     //start of TODO 通过计数建图算法或TSDF算法对栅格进行更新（2,3题内容）
+    for (int i = 0; i < mapParams.width * mapParams.height; ++i)
+    {
+        if (pMapHits[i] + pMapMisses[i] == 0)
+        {
+            pMap[i] = 50;
+            continue;
+        }
 
+        double r = double(pMapHits[i]) / (pMapHits[i] + pMapMisses[i]);
+        if (r > 0.25)
+            pMap[i] = 100;
+        else
+            pMap[i] = 0;
+    }
     //end of TODO
     std::cout << "建图完毕" << std::endl;
 }
