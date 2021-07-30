@@ -188,18 +188,76 @@ void OccupanyMapping(std::vector<GeneralLaserScan> &scans, std::vector<Eigen::Ve
 
             //start of TODO 对对应的map的cell信息进行更新．（1,2,3题内容）
             GridIndex grid_hit = ConvertWorld2GridIndex(world_x, world_y);
+            if (!isValidGridIndex(grid_hit))
+                continue;
+            std::vector<GridIndex> grid_miss = TraceLine(robotIndex.x, robotIndex.y, grid_hit.x, grid_hit.y);
 
-            double robot_laser_x = grid_hit.x - robotIndex.x;
-            double robot_laser_y = grid_hit.y - robotIndex.y;
+            double threshold = 2 * mapParams.resolution;
+            double dist_max = dist + 3 * threshold;
 
-            for (int i = -10; i <= 10; ++i)
+            double laser_x_max = dist_max * std::cos(angle);
+            double laser_y_max = dist_max * std::sin(angle);
+
+            double world_x_max = std::cos(theta) * laser_x_max - std::sin(theta) * laser_y_max + robotPose(0);
+            double world_y_max = std::sin(theta) * laser_x_max + std::cos(theta) * laser_y_max + robotPose(1);
+
+            GridIndex grid_max = ConvertWorld2GridIndex(world_x_max, world_y_max);
+
+            std::vector<GridIndex> near_grids;
+
+            if (!isValidGridIndex(grid_max))
+                near_grids = grid_miss;
+            else
+                near_grids = TraceLine(robotIndex.x, robotIndex.y, grid_max.x, grid_max.y);
+
+            for (std::vector<GridIndex>::iterator it = near_grids.begin(); it != near_grids.end(); ++it)
             {
-                GridIndex tmpt;
+                double grid_dist = std::sqrt(std::pow(it->x - robotIndex.x, 2) + std::pow(it->y - robotIndex.y, 2));
+
+                double world_dist = grid_dist * mapParams.resolution;
+
+                double tsdf = std::max(-1.0, (dist - world_dist) / threshold);
+                int linearIndex = GridIndexToLinearIndex(*it);
+
+                pMapTSDF[linearIndex] = (pMapW[linearIndex] * pMapTSDF[linearIndex] + tsdf) / (pMapW[linearIndex] + 1);
+                pMapW[linearIndex] += 1;
             }
         }
     }
     //start of TODO 通过计数建图算法或TSDF算法对栅格进行更新（2,3题内容）
+    for (size_t i = 0; i < mapParams.height; ++i)
+    {
+        double prev_tsdf = pMapTSDF[i * mapParams.width];
+        for (size_t j = 1; j < mapParams.width; ++j)
+        {
+            double curr_tsdf = pMapTSDF[i * mapParams.width + j];
+            if (curr_tsdf > 0)
+            {
+                pMap[i * mapParams.width + j] = 0;
+            }
+            else if (curr_tsdf < 0)
+            {
+                pMapW[i * mapParams.width + j] = -1;
+            }
+            else
+            {
+                pMapW[i * mapParams.width + j] = 100;
+            }
 
+            if (prev_tsdf * curr_tsdf < 0)
+            {
+                if (std::fabs(prev_tsdf) > std::fabs(curr_tsdf))
+                {
+                    pMap[i * mapParams.width + j] = 100;
+                }
+                else
+                {
+                    pMap[i * mapParams.width + j - 1] = 100;
+                }
+            }
+            prev_tsdf = curr_tsdf;
+        }
+    }
     //end of TODO
     std::cout << "建图完毕" << std::endl;
 }

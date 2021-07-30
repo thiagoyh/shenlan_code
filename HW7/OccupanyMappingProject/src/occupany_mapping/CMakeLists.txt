@@ -32,7 +32,7 @@ include_directories(
 
 add_executable(occupany_mapping
 
-src/occupany_mapping.cpp
+src/occupany_mapping_3.cpp
 src/readfile.cpp)
 
 

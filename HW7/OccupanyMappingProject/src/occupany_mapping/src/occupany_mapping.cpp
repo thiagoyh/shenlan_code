@@ -254,7 +254,10 @@ void PublishMap(ros::Publisher &map_pub)
         }
         else
         {
-            rosMap.data[i] = pMap[i];
+            if (pMap[i] > 80)
+                rosMap.data[i] = 100;
+            if (pMap[i] < 20)
+                rosMap.data[i] = 0;
         }
     }
 

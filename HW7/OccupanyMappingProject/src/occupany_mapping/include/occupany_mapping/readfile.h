@@ -6,7 +6,7 @@
 #include <iostream>
 
 //max 3700
-#define READ_DATA_NUMBER 100
+#define READ_DATA_NUMBER 3700
 
 typedef struct general_laser_scan
 {
